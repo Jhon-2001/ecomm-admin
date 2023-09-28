@@ -8,6 +8,7 @@ import prismadb from "@/lib/prismadb"
 export async function POST(req: Request) {
   const body = await req.text()
   const signature = headers().get("Stripe-Signature") as string
+
   let event: Stripe.Event
 
   try {
@@ -34,7 +35,6 @@ export async function POST(req: Request) {
 
   const addressString = addressComponents.filter((c) => c !== null).join(', ');
 
-  console.log(addressComponents)
 
   if (event.type === "checkout.session.completed") {
     const order = await prismadb.order.update({
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         orderItems: true,
       }
     });
-    console.log(order)
+
     const productIds = order.orderItems.map((orderItem) => orderItem.productId);
 
     await prismadb.product.updateMany({
